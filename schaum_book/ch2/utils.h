@@ -4,8 +4,12 @@
 #include <iostream>
 
 void hola_mundo();
-void ch2_1();
+int ch2_1();
 int ch2_2();
+int ch2_3();
+int ch2_4();
+int ch2_7();
+int ch2_8();
 
 /*
 */
