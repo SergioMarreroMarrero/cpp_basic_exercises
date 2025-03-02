@@ -8,4 +8,4 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 file(GLOB SOURCES "*.cpp")
 
 # 🔹 Crear el ejecutable con todos los archivos .cpp encontrados
-add_executable(ch2 ${SOURCES})
+add_executable(${PROJECT_NAME} ${SOURCES})
