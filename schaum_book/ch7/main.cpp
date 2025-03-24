@@ -8,6 +8,8 @@
 
 using namespace std;
 
+void modificarArray(int arr[]);
+
 int main(){
     int a[4];
     int result[4];
@@ -70,10 +72,27 @@ int main(){
         }
         cout << endl;
     }
+
+
+    int numeros[] = {1, 2, 3, 4, 5};
+    modificarArray(numeros);
+    cout << "Primer elemento después de modificarArray(): " << numeros[0] << endl;  // Imprime 100
+    
     system("PAUSE");
     return 0;
 }
 
 
 
+void modificarArray(int arr[]) {  // Se recibe un puntero, NO una referencia al array
+    arr[0] = 100;  // Modificamos el primer elemento
+}
 
+/*
+int main() {
+    int numeros[] = {1, 2, 3, 4, 5};
+    modificarArray(numeros);
+    cout << "Primer elemento después de modificarArray(): " << numeros[0] << endl;  // Imprime 100
+    return 0;
+}
+*/
