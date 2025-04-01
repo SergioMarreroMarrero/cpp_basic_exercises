@@ -6,8 +6,9 @@
 
 
 using namespace std;
+#define max 1000 // Definimos el tamaño máximo del stack
 
-
+// ======================== CLASE PUNTO ========================
 class Point
 {
     public:
@@ -46,6 +47,8 @@ class Point
 
         // Asigna nuevas coordenadas
         void assign(float x, float y, float z);
+
+        ~Point(){} // Destructor (no hace nada, pero se puede definir si se quiere liberar memoria)
 
     private:
         float x_, y_, z_;
@@ -90,9 +93,55 @@ void Point::assign(float x, float y, float z){
     setY(y);
     setZ(z);
 }
+// ======================== FIN CLASE PUNTO ========================
+
+// ======================== CLASE COUNTER ========================
+class Counter
+{
+    private:
+        unsigned int count; // Contador de instancias de la clase Counter
+    public:
+        Counter() {count = 0;} // Constructor por defecto
+        void increment() {count++;} // Incrementa el contador
+        int get_count() const {return count;} // Devuelve el valor del contador
+        ~Counter(){} // Destructor (no hace nada, pero se puede definir si se quiere liberar memoria)
+};
+
+// ======================== FIN CLASE COUNTER ========================
+
+// ======================== CLASE STACK ========================
+class Stack
+{
+    private:
+        int top;
+        float a[max];
+    public:
+        Stack(){top = 0;} // Constructor por defecto -> inicializa el stack vacío
+        float pop(); // Saca el elemento del stack
+        void push(float x); // Añade un elemento al stack 
+        ~Stack(){} // Destructor (no hace nada, pero se puede definir si se quiere liberar memoria)
+};
+
+float Stack::pop()
+{
+    if (top <=0)
+        cout << "stack overtflow" << endl;
+    else
+        return a[--top]; // Decrementa el top y devuelve el elemento
+}
+
+void Stack::push(float x)
+{
+    if (top >=max)
+        cout << "stack overtflow" << endl;
+    else
+        a[top++] = x; // Decrementa el top y devuelve el elemento
+}
+// ======================== FIN CLASE STACK ========================
 
 
 int main(int argc, char* argv[]){
+    // ======================== CLASE PUNTO ========================
     Point p, p1; // Constructor por defecto -> (0,0,0)
     Point p2(1.0, 2.0, 3.0); // Constructor con 3 coordenadas -> (1,2,3)
     Point p3(p2); // Constructor de copia -> (1,2,3)
@@ -104,6 +153,25 @@ int main(int argc, char* argv[]){
     p1.printPoint(); // (0,0,0)
     p2.printPoint(); // (1,2,3)
     p3.printPoint(); // (1,2,3)
+    
+    // ======================== FIN CLASE PUNTO ========================
+    // ======================== CLASE COUNTER ========================
+    Counter c;
+    for (int i = 0; i < 10; i++){
+        cout << " c = " << c.get_count() << endl;
+        c.increment(); // Incrementa el contador
+        if (c.get_count() == 2){
+            c = Counter(); // Reinicia el contador a 0
+        }
+    }
+    // ======================== FIN CLASE COUNTER ========================
+    // ======================== CLASE STACK ========================
+    Stack s;
+    s.push(1.0); // Añade 1.0 al stack
+    s.push(2.0); // Añade 2.0 al stack  
+    cout << "s.pop() = " << s.pop() << endl; // Saca el elemento del stack (2.0)
+    cout << "s.pop() = " << s.pop() << endl; // Saca el elemento del stack (1.0)
+    // ======================== FIN CLASE STACK ========================
 
     system("PAUSE");
     return EXIT_SUCCESS;
