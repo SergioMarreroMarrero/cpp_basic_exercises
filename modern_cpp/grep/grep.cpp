@@ -1,100 +1,97 @@
-/*
-Tambien podemos hacer:
-
-Pero claro...si lo que queremos es programas rapidos...tampoco tiene mucho sentido que lo hagamos así
-idealmente solo lo deberíamos usar en archivos de codigo fuente y no en archivos de cabecera
-
-
-
-A esto se le llama: notacion de constructor Estamos llamando a una funcion especifica del tipo de datos ifstream que recibe un nombre y construye un objeto
-ifstream archivo(nombre_archivo);
-lo que hacemos es: 
-1. tipo de dato "ifstream"
-2. le pasamos el "nombre_archivo" a "archivo" que es la variable tipo "ifstream"
-Entiendo que automaticamente construye el tipo "ifstream"
-Es un poco confuso por ahora
-Es algo así como: el constructor del tipo ifstream necesita solamente una direccion de un archivo
-Algo así podriamos hacer con un entero:
-
-int numero(5); -> el constructor de un tipo entero solo necesita el 5 para construirse
-
-De locos este ejemplo. Los {} define un scope donde una variable existe
-Esto significa que {} funciona como destructor de la variable
-string cadena = "hola";
-{
-    int numero = 100;
-    cout << numero << endl;
-    cout << cadena << endl;
-}
-cout << numero << endl;
-cout << cadena << endl;
-
-// Buscar el patron y mostrar lineas
-string linea;
-getline(archivo, linea);
-while(!archivo.eof()){ //eof() -> indica si ha llegado al fin de archivo
-    cout << linea << endl;
-    getline(archivo, linea);
-}
-// Notacion alternativa
-// Cuando getline devuelve un archivo ok devuelve True. Si este se acaba devuelve False
-
-¿Qué es size_t?
-size_t es un tipo de dato entero sin signo (unsigned int) diseñado para almacenar tamaños o índices.
-Su ventaja es que se adapta al sistema: en una máquina de 32 bits será de 32 bits, y en una de 64 bits será de 64 bits.
-Lo usas cuando trabajas con posiciones, tamaños o conteos (como índices de arrays, strings, o tamaños de memoria).
-*/
-
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <regex>
+#include <vector>
 
-/*
-using std::string;
-using std::cout;
-using std::cerr;
-using std::endl;
-using std::ifstream;
-*/
 using namespace std;
 
 
-int main(int argc, char* argv[]){
+/*
+Patron de iteracion
+    Ojo a este patron para iterar por listas
+for(int i=0;i!=list_of_files.size();i++){
+    cout << list_of_files[i] << endl;
+}
 
-    // Verificacion de argumentos en la linea de comandos
-    if (argc != 3){
-        cout << "Como minimo deben haber 2 argumentos. Se han pasado menos de 2." << endl;
-        cout << "Uso correcto: " << argv[0] << "<patron> <nombre_archivo>" << endl;
-        return 0;
+for (const auto& file : list_of_files) {
+    cout << file << endl;
+}
+*/
+/*
+    cout << "pattern: " << pattern << endl;
+    for (const auto& file : list_of_files) {
+        cout << "path_to_file: " << file << endl;
     }
+    cout << "show number lines: " << (show_line_number ? "yes" : "no") << endl;
+*/
 
-    // Recibir parametros de la linea de comandos
-    bool leido_patron = false, mostrar_linea = false;
-    string patron, nombre_archivo;
-    for (int i = 1;i != argc; i++){
-        string argumento = argv[i];
-        if (argumento == "-n"){
-            
+
+
+void look_for_pattern_in_file(
+    const string& path_to_file, // referencia al argumento constante
+    const regex& re_pattern,
+    bool show_line_number, // estas no tiene sentido definirlas como referencia constante porque son muy pequeñas (bool)
+    bool show_file_name){
+        
+        // abrir el archivo
+        ifstream file(path_to_file);
+        if(!file.is_open()){
+            cout << "File:" << path_to_file << "not found";
+            return;
+        }
+        // buscar el patron
+
+        string line;
+        size_t line_number = 0;
+        while(getline(file, line)){
+            if(regex_search(line, re_pattern)){        
+                if(show_file_name) cout << path_to_file << ": ";
+                if(show_line_number) cout << line_number << ": ";
+                cout << line << endl;
+            }
+            ++line_number;
         }
     }
-    patron = argv[1];
-    nombre_archivo = argv[2];
 
+int main(int argc, char* argv[]){
 
-    // Abrir el archivo
-    ifstream archivo(nombre_archivo);
-    if(!archivo.is_open()){
-        // Es recomendable distinguir entre cout -> usuario y cerr -> salida estandar de errores
-        cerr << "No fue posible abrir el archivo: " << nombre_archivo << endl;
+    // verificar numero de parametros
+    if (argc<3){
+        cout << "Failed. The pattern of the command is: " << argv[0] << "<pattern> <path_to_file>" << endl;
         return -1;
     }
 
-    string linea;
-    while(getline(archivo, linea)){
-        size_t posicion = linea.find(patron); // cuando no lo encuentra en lugar de devolver -1 devuelve string::npos
-        if(posicion != string::npos){ // string::npos es una constante con el entero más grande posible 2**64-1 (o ensistemas de 32 2**32-1)
-            cout << linea << endl;
+    // asignacion de parametros
+    // si pasamos el parametro "-n" entonces queremos que muestre el número de la linea
+    // el argumento "-n" puede venir en cualquier orden. Lo que is sabemos es que pattern viene antes que la direccion del fichero
+
+    bool is_pattern_readed = false, show_line_number = false;
+    vector<string> list_of_files;
+    string pattern, path_to_file;
+    for (int i = 1; i!=argc; i++){
+        string argument = argv[i];
+        if (argument == "-n"){
+            show_line_number = true;
+        }
+        else if(!is_pattern_readed){
+            pattern = argument;
+            is_pattern_readed = true;
+        }else{
+            list_of_files.push_back(argument);
         }
     }
-    return 0;
+
+    // mostramos el nombre del archivo donde estamos buscando? Si hay varios si, si solo hay uno no
+    bool show_file_name = list_of_files.size() > 1;
+    
+    regex re_pattern(pattern, regex_constants::icase); // regex_constants::icase -> case sensitive
+
+
+    for(const auto& path_to_file : list_of_files){
+        look_for_pattern_in_file(path_to_file, re_pattern, show_line_number, show_file_name);
+    }
+
 }
+
+
